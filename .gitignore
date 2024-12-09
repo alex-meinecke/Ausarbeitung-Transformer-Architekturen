@@ -1,0 +1,17 @@
+# Igoniere alle Dateien vom Typen:
+*.log
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.dvi
+*.fdb_latexmk
+*.fls
+*.lof
+*.lol
+*.lot
+*.out
+*.out.ps
+*.run.xml
+*.synctex.gz
+*.toc
