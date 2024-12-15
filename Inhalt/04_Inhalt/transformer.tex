@@ -1,0 +1,93 @@
+\chapter{Transformer-Architektur im Detail}
+
+Im ursprünglichen Werk \textit{Attention Is All You Need} \todo{cite}, in dem das grundlegende Transformer-Modell vorgestellt wurde, besteht ein Transformer aus zwei Hauptkomponenten: 
+dem Encoder und dem Decoder. 
+
+Encoder und Decoder verarbeiten Text in Form von Tokens, die ganze Wörter oder Wortteile sein können. 
+Jeder Token ist für den Transformer einzigartig und wird zunächst nur durch eine natürliche Zahl repräsentiert. 
+
+Der \textbf{Encoder} übersetzt die Eingabewörte in eine abstrahierte Repräsentation.
+Ziel ist es hierbei, die semantischen und syntaktischen Informationen des Textes zu extrahieren und zu kodieren.  
+Die andere Komponente, der \textbf{Decoder}, nutzt diese Repräsentation, um ein passendes Output zu generieren. 
+Dabei berechnet er in jeder Iteration den nächsten, am besten passenden Token, der zum Output hinzugefügt werden soll. 
+Hierbei bezieht er auch den zuletzt generierten Token in die Berechnung des nächsten Tokens ein.
+
+Grundlage für sowohl den Encoder als auch den Decoder ist das Self-Attention-Konzept, das im folgenden Abschnitt näher erläutert wird.
+
+\section{Wie funktioniert Attention?}
+
+Ein Attention-Zyklus kann als Übersetzungsfunktion von Eingabevektoren zu Ausgabevektoren verstanden werden.
+
+\subsection{Generierung von Embeddings}
+
+Grundlage jedes Attention-Zyklus sind Eingabe-Tokens. 
+Um die mathematische Vorgehensweise besser zu veranschaulichen, wird im Folgenden der Satz \enquote{Ich sitze auf der Bank} beispielsweise verarbeitet.
+Jeder dieser Worter ist ein eigener Token, der vor der Eingabe in den Attention-Zyklus von dem Transformer übersetzt wurde.
+[\enquote{Ich}, \enquote{sitze}, \dots, \enquote{Bank}]. 
+Diese Tokens können für das Modell wie folgt aussehen: [\enquote{243}, \enquote{645}, \dots, \enquote{316}].
+Die Schwierigkeit für den Transformer besteht hierbei, dass nur einen Token für \enquote{Bank} gibt und es jetzt aus dem Kontext der anderen Tokens erkennen muss, ob es sich um eine Sitzbank oder und das Finanzinstitut Bank handelt.
+
+Jeder Token ist ein Schlüssel für ein Schlüssel-Werte-Paar.
+Der korrespondierende Wert hinter einem Token ist ein Vektor, der die Bedeutung eines Tokens hinsichtlich mehrer Dimensionen erklärt.
+Diese Vektoren sind aus Trainingsdaten für das Transformermodel entstanden.
+
+Im ersten Schritt im Attention-Zyklus wird jeder Token in den dazugehörigen Vektor übersetzt.
+Diese Vektoren werden in der Matrix $\mathbf{X}$ gespeichert, wobei jede Zeile ein Vektor ist und einen Token repräsentiert.
+Dieser Prozess wird \textbf{Embedding} genannt. 
+Jeder dieser Vektoren hat laut Literatur mindestens 512 Dimensionen.
+Es wird von einem \( d_{\text{model}} = 512 \) gesprochen.
+Es gilt je größer das \( d_{\text{model}} \), desto präziser kann ein Transformer die Zusammenhänge zwischen Tokens erkennen.
+
+Wenn sich Token im Vektorraum nahe liegen, dann haben sie eher Gemeinsamkeiten als Token, die weit auseinander liegen.
+Angenommen es gäbe nur ein \( d_{\text{model}} = 2 \) für jeden Token, könnten diese zwei Dimensionen als Koordinaten genutzt werden, um Zusammenhänge visuell in einem Koordinatensystem als Cluster sichtbar zu machen.
+Hier wären z.B. die Token für \enquote{Hund} und \enquote{Katze} nah beieinander.
+
+Für das oben genannte Bespiel \enquote{Ich sitze auf der Bank}, werden für die Übersichtlichkeit nun ein \( d_{\text{model}} = 4 \).
+So liegt letztendlich eine Embeddingmatrix $\mathbf{X}$ von 5 Zeilen für 5 Token und 4 Spalten für jeweils 4 Dimensionen vor.
+\[
+\centering
+X =
+\begin{bmatrix}
+0.4 & 0.8 & 1.5 & 1.6 \\
+3.2 & 0.4 & 0.7 & 0.2 \\
+0.6 & 0.9 & 1.2 & 0.5 \\
+2.1 & 0.5 & 2.0 & 0.2 \\
+0.7 & 2.4 & 0.1 & 0.9
+\end{bmatrix}
+\]
+
+
+\subsection{Lineare Transformation in Query-, Key- und Value-Matrizen}
+
+Die Embeddingmatrix $\mathbf{X}$ wird mithilfe dreier Gewichtungsmatrizen $\mathbf{W_Q}$, $\mathbf{W_K}$ und $\mathbf{W_V}$, die aus dem Training des Transformer-Modells stammen, in drei neue Matrizen mit Matrixmultiplikation transformiert:
+
+\[
+\mathbf{Q} = \mathbf{X} \cdot \mathbf{W_Q}
+\]
+\[
+\mathbf{K} = \mathbf{X} \cdot \mathbf{W_K}
+\]
+\[
+\mathbf{V} = \mathbf{X} \cdot \mathbf{W_V}
+\]
+
+Die drei Matrizen haben dabei für den Attention-Zyklus umgangssprachlich formuliert folgende Fragen zu beantworten:
+
+\begin{itemize}
+    \item \textbf{Query-Matrix ($\mathbf{Q}$)}: Was fragt ein Token?
+    \item \textbf{Key-Matrix ($\mathbf{K}$)}: Welche Token im Kontext antworten am besten auf die Frage?
+    \item \textbf{Value-Matrix ($\mathbf{V}$)}: Welche Informationen fließen letztendlich in den nächsten Schritt ein.
+\end{itemize}
+
+In dem Beispiel könnten die jeweiligen Zeilen von $\math{Q}$, $\math{K}$, $\math{V}$ für das Token \enquote{Bank} folgend aussehen:
+
+\[
+\begin{aligned}
+\math{Q}_{\text{Bank}} &= [1.0, 0.7, 0.9, 1.1] \quad 
+\math{Q}_{\text{Bank}} &= [0.8, 0.6, 1.0, 0.9] \quad 
+\math{Q}_{\text{Bank}} &= [0.9, 0.5, 0.7, 1.0]
+\end{aligned}
+\]
+
+\subsection{Berechnung der Attention-Scores}
+
