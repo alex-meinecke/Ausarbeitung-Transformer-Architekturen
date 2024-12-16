@@ -76,7 +76,7 @@ Die drei Matrizen haben im Attention-Zyklus umgangssprachlich formuliert folgend
 \begin{itemize}
     \item \textbf{Query-Matrix (\(\mathbf{Q}\))}: Was fragt ein Token?
     \item \textbf{Key-Matrix (\(\mathbf{K}\))}: Welche Tokens im Kontext antworten am besten auf die Frage?
-    \item \textbf{Value-Matrix (\(\mathbf{V}\))}: Welche Informationen fließen letztendlich in den nächsten Schritt ein?
+    \item \textbf{Value-Matrix (\(\mathbf{V}\))}: Erlernten Informationen über ein Token.
 \end{itemize}
 
 Im Beispiel könnten die jeweiligen Zeilen der Matrizen \(\mathbf{Q}\), \(\mathbf{K}\), \(\mathbf{V}\) für das Token \enquote{Bank} folgendermaßen aussehen:
@@ -89,4 +89,65 @@ Im Beispiel könnten die jeweiligen Zeilen der Matrizen \(\mathbf{Q}\), \(\mathb
 \end{aligned}
 \]
 
-\subsection{Berechnung der Attention-Scores}
+\subsection{Berechnung und Einbeziehung von Attention-Scores}
+
+Um die Relevanz zwischen \(\math{Q}\) und \(\math{K}\) zu messen, wird jeweils das Skalarprodukt zwischen jedem Tokenvektor von \(\math{Q}_{\text{T}}\) und \(\math{K}_{\text{T}}\) gebildet.  
+Also im Beispiel wird unter anderem der Tokenvektor \(\math{Q}_{\text{Bank}}\) mit jedem Tokenvektor \(\math{K}_{\text{T}}\) multipliziert.
+
+\[
+\begin{aligned}
+\text{Score}_{\text{Bank,Ich}} &= [1.0, 0.7, 0.9, 1.1] \cdot [0.4, 0.5, 0.1, 0.3] \\
+&= 0.4 + 0.35 + 0.09 + 0.33 &= 1.17 \\
+\text{Score}_{\text{Bank,Sitze}} &= [1.0, 0.7, 0.9, 1.1] \cdot [0.9, 0.8, 0.75, 0.8] \\
+&= 0.9 + 0.56 + 0.675 + 0.88 &= 3.015 \\
+\vdots \\
+\text{Scores}_{\text{Bank}} &= [1.17, 3.015, 2.92, 1.12, 2.98]
+\end{aligned}
+\]
+
+
+Die berechneten Attentionscores müssen noch zwei Verfahren unterlaufen.
+Einmal ist das die Fokussierung und Normalisierung der Attentionscores mit der \textbf{Softmax-Funktion}.
+\[
+\text{Softmax}(x_i) = \frac{\exp(x_i)}{\sum_{j} \exp(x_j)}
+\]
+
+\(\math{x}\) ist der jeweilige aktuell zu betrachtende Attention-Score-Vektor.  
+\(i\) ist der aktuell zu betrachtende Werteindex in diesem Vektor.  
+\(j\) ist die Gesamtanzahl an Werten in \(\math{x}\).
+
+Bei der \textbf{Fokussierung} werden höhere Attention-Score-Werte zwischen \(\mathbf{Q}\) und \(\mathbf{K}\) exponentiell bevorzugt.  
+Analog dazu werden niedrigere Attention-Score-Werte exponentiell nach unten bewertet.  
+Bei der zweiten Aufgabe der Softmax-Funktion, der \textbf{Normalisierung}, werden die Attention-Score-Werte pro Score-Vektor in Wahrscheinlichkeiten zwischen \(0\) und \(1\) transformiert, wobei die Summe jedes Attention-Score-Vektors immer \(1\) ist.
+
+Damit die Softmax-Funktion aber optimal funktionieren kann, müssen die Werte in den Attention-Score-Vektoren erst einmal dimensioniert werden.
+Bei geläufigen Transformermodellen wird wie oben beschrieben, ein \( d_{\text{model}} \) von mindestens 512 verwendet.
+Durch diese großen Dimensionen entehen bei der Berechnung von den Attention-Scores durch die Aufsummierung bei der Bildung des Skalarprodukte sehr große Werte.
+Diese großen Werte sorgen dafür, dass die Softmax-Funktion viele Q-K-Beziehungen sehr hoch bewertet und so der Transformer nicht sich auf die tatsächlich vielversprechenden Verbindungen konzentrieren kann und so die Weiterverarbeitung ungenau wird.
+Diese Werte fallen bei dem oben gerechneten Beispiel nicht auf, da hier nur mit einem \( d_{\text{model}} \) von vier gerechnet wird.
+
+Um hohe Attention-Score-Werte zu normalisieren, werden die Attention-Score-Vektor-Werte durch \( \sqrt{d_{\text{model}}} \) geteilt und so für die Softmax-Funktion in einen stabilen Bereich gebracht. \\
+So kann ein Transformer auch kleine Relevanzunterschiede in der Token-Beziehung berücksichtigen.
+Hier beispielsweise für das Attention-Score-Array von \enquote{Bank}:
+
+\[
+\frac{\text{Scores}_{\text{Bank}}}{\sqrt{4}} = [0.585, 1.5075, 1.46, 0.56, 1.49]
+\]
+
+\[
+\text{Softmax}\left(\frac{\text{Scores}_{\text{Bank}}}{\sqrt{4}}\right) = [0.107, 0.269, 0.256, 0.104, 0.264]
+\]
+
+Damit diese nun umgewandelten Attention-Score-Wahrscheinlichkeiten in den weiteren Verarbeitungsschritten berücksichtigt werden können, werden sie mit der \( V \)-Matrix multipliziert. 
+Das zeigt dem Modell, zu wie viel Prozent der erlernten Informationen zu einem Token im nächsten Schritt einfließen.
+Insgesamt sieht das Verfahren folgendermaßen aus:
+
+\[
+\text{Attention}(Q, K, V) = \operatorname{Softmax}\left(\frac{QK^T}{\sqrt{d_{\text{model}}}}\right) V
+\]
+
+%Also werden die finalen die Informationen für Bank \math{V}_{\text{Bank}} folgendermaßen gewichtet:
+
+%\[
+%\math{Z}_{\text{Bank}} = [0.107, 0.269, 0.256, 0.104, 0.264] \cdot [0.9, 0.5, 0.7, 1.0] = [0.9, 0.5, 0.7, 1.0]
+%\]
