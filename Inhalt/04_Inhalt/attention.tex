@@ -138,18 +138,3 @@ Insgesamt sieht das Verfahren folgendermaßen aus:
 %\[
 %\math{Z}_{\text{Bank}} = [0.107, 0.269, 0.256, 0.104, 0.264] \cdot [0.9, 0.5, 0.7, 1.0] = [0.9, 0.5, 0.7, 1.0]
 %\]
-
-\section{Multi-Head-Attention}
-
-Um Transformer noch effizienter zu machen, wird das Attention-Prinzip in Form der \textbf{Multi-Head-Attention} angewendet. 
-Dabei beschreibt jeder einzelne Kopf einen eigenen Attention-Zyklus, wie er oben beschrieben wurde.
-
-Jeder Kopf verwendet hierbei unterschiedliche Gewichtungsmatrizen, um den Fokus bei der Analyse der Zusammenhänge zwischen Tokens auf verschiedene Schwerpunkte zu setzen. 
-So kann beispielsweise ein Kopf die Tokens hinsichtlich syntaktischer Beziehungen analysieren, während ein anderer die semantischen Beziehungen betrachtet. 
-Für jeden Attention-Kopf \( h \) werden dabei unterschiedliche Gewichtungsmatrizen \( \mathbf{W}_{Qh} \), \( \mathbf{W}_{Kh} \) und \( \mathbf{W}_{Vh} \) verwendet.
-
-Viele Transformermodelle verwenden acht Attention-Köpfe, die parallel ausgeführt werden.
-Nach der parallelen Verarbeitung werden die jeweiligen Ergebnisse der Köpfe zusammenfügt, auch konkatinieren genannt, und mit Hilfe einer weiteren Gewichtungsmatrix \( \mathbf{W}_{O} \) zusammengefasst.
-\( \mathbf{W}_{O} \) ist hierbei die Matrix, welche die Ergebnisse der Attention-Köpfe nach unterschiedlich gewichtet.
-Umgangssprachlich formuliert, bildet sie eine einheitliche Schlussfolgerung für den Transformer aus diesen Muli-Head-Attention-Zyklus.
-
