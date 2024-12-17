@@ -1,0 +1,155 @@
+\chapter{Die Funktionsweise von Self-Attention}
+
+Transformer arbeiten mit dem zentralen Baustein Self-Attention.
+Self-Attention ist ein Algorithmus der letztendlich Zusammenhänge zwischen Wörtern z.B. in einem Text aufzeigt.
+Wörter werden in Form von Tokens verarbeitet, die ganze Wörter oder Wortteile sein können.
+Jeder Token ist einzigartig und wird zunächst nur durch eine natürliche Zahl repräsentiert.
+
+\section{Generierung von Embeddings}
+
+Grundlage jedes Attention-Zyklus sind Eingabe-Tokens.  
+Um die mathematische Vorgehensweise besser zu veranschaulichen, wird im Folgenden der Satz \enquote{Ich sitze auf der Bank} als Beispiel verarbeitet.
+Jedes dieser Wörter ist ein eigener Token, der vor der Eingabe in den Attention-Zyklus vom Transformer übersetzt wurde:
+[\enquote{Ich}, \enquote{sitze}, \dots, \enquote{Bank}].  
+Diese Tokens könnten für das Modell wie folgt aussehen: [\enquote{243}, \enquote{645}, \dots, \enquote{316}].
+Die Herausforderung für den Transformer besteht darin, aus dem Kontext der anderen Tokens zu erkennen, ob \enquote{Bank} eine Sitzbank oder das Finanzinstitut Bank bedeutet.
+
+Jeder Token bildet ein Schlüssel-Werte-Paar.  
+Der korrespondierende Wert hinter einem Token ist ein Vektor, der die Bedeutung eines Tokens hinsichtlich mehrerer Dimensionen beschreibt.  
+Diese Vektoren sind aus Trainingsdaten des Transformer-Modells entstanden.
+
+Im ersten Schritt des Attention-Zyklus wird jeder Token in den dazugehörigen Vektor übersetzt.  
+Diese Vektoren werden in der Matrix $\mathbf{X}$ gespeichert, wobei jede Zeile einen Token repräsentiert.  
+Dieser Prozess wird als \textbf{Embedding} bezeichnet.  
+Jeder dieser Vektoren hat gemäß der Literatur mindestens 512 Dimensionen.  
+Es wird von einem \( d_{\text{model}} = 512 \) gesprochen.  
+Es gilt: Je größer das \( d_{\text{model}} \), desto präziser kann der Transformer die Zusammenhänge zwischen Tokens erkennen.
+
+Wenn sich Tokens im Vektorraum nahe liegen, haben sie eher Gemeinsamkeiten im Vergleich zu Tokens, die weit auseinander liegen.  
+Angenommen, es gäbe nur ein \( d_{\text{model}} = 2 \) für jeden Token, könnten diese zwei Dimensionen als Koordinaten genutzt werden, um Zusammenhänge visuell als Cluster in einem Koordinatensystem darzustellen.  
+Hier wären beispielsweise die Tokens \enquote{Hund} und \enquote{Katze} nah beieinander.
+
+Für das oben genannte Beispiel \enquote{Ich sitze auf der Bank} nehmen wir der Übersichtlichkeit halber ein \( d_{\text{model}} = 4 \).  
+So ergibt sich eine Embedding-Matrix $\mathbf{X}$ mit 5 Zeilen für 5 Tokens und 4 Spalten für jeweils 4 Dimensionen:
+
+\[
+\centering
+\mathbf{X} =
+\begin{bmatrix}
+0.4 & 0.8 & 1.5 & 1.6 \\
+3.2 & 0.4 & 0.7 & 0.2 \\
+0.6 & 0.9 & 1.2 & 0.5 \\
+2.1 & 0.5 & 2.0 & 0.2 \\
+0.7 & 2.4 & 0.1 & 0.9
+\end{bmatrix}
+\]
+
+\section{Lineare Transformation in Query-, Key- und Value-Matrizen}
+
+Die Embedding-Matrix $\mathbf{X}$ wird durch drei Gewichtungsmatrizen $\mathbf{W_Q}$, $\mathbf{W_K}$ und $\mathbf{W_V}$, die aus dem Training des Transformer-Modells stammen, in drei neue Matrizen transformiert:
+
+\[
+\mathbf{Q} = \mathbf{X} \cdot \mathbf{W_Q}
+\]
+\[
+\mathbf{K} = \mathbf{X} \cdot \mathbf{W_K}
+\]
+\[
+\mathbf{V} = \mathbf{X} \cdot \mathbf{W_V}
+\]
+
+Die drei Matrizen haben im Attention-Zyklus umgangssprachlich formuliert folgende Funktionen:
+
+\begin{itemize}
+    \item \textbf{Query-Matrix (\(\mathbf{Q}\))}: Was fragt ein Token?
+    \item \textbf{Key-Matrix (\(\mathbf{K}\))}: Welche Tokens im Kontext antworten am besten auf die Frage?
+    \item \textbf{Value-Matrix (\(\mathbf{V}\))}: Erlernten Informationen über ein Token.
+\end{itemize}
+
+Im Beispiel könnten die jeweiligen Zeilen der Matrizen \(\mathbf{Q}\), \(\mathbf{K}\), \(\mathbf{V}\) für das Token \enquote{Bank} folgendermaßen aussehen:
+
+\[
+\begin{aligned}
+\math{Q}_{\text{Bank}} &= [1.0, 0.7, 0.9, 1.1], \quad 
+\math{K}_{\text{Bank}} &= [0.8, 0.6, 1.0, 0.9], \quad 
+\math{V}_{\text{Bank}} &= [0.9, 0.5, 0.7, 1.0]
+\end{aligned}
+\]
+
+\section{Berechnung und Einbeziehung von Attention-Scores}
+
+Um die Relevanz zwischen \(\math{Q}\) und \(\math{K}\) zu messen, wird jeweils das Skalarprodukt zwischen jedem Tokenvektor von \(\math{Q}_{\text{T}}\) und \(\math{K}_{\text{T}}\) gebildet.  
+Also im Beispiel wird unter anderem der Tokenvektor \(\math{Q}_{\text{Bank}}\) mit jedem Tokenvektor \(\math{K}_{\text{T}}\) multipliziert.
+
+\[
+\begin{aligned}
+\text{Score}_{\text{Bank,Ich}} &= [1.0, 0.7, 0.9, 1.1] \cdot [0.4, 0.5, 0.1, 0.3] \\
+&= 0.4 + 0.35 + 0.09 + 0.33 &= 1.17 \\
+\text{Score}_{\text{Bank,Sitze}} &= [1.0, 0.7, 0.9, 1.1] \cdot [0.9, 0.8, 0.75, 0.8] \\
+&= 0.9 + 0.56 + 0.675 + 0.88 &= 3.015 \\
+\vdots \\
+\text{Scores}_{\text{Bank}} &= [1.17, 3.015, 2.92, 1.12, 2.98]
+\end{aligned}
+\]
+
+
+Die berechneten Attentionscores müssen noch zwei Verfahren unterlaufen.
+Einmal ist das die Fokussierung und Normalisierung der Attentionscores mit der \textbf{Softmax-Funktion}.
+\[
+\text{Softmax}(x_i) = \frac{\exp(x_i)}{\sum_{j} \exp(x_j)}
+\]
+
+\(\math{x}\) ist der jeweilige aktuell zu betrachtende Attention-Score-Vektor.  
+\(i\) ist der aktuell zu betrachtende Werteindex in diesem Vektor.  
+\(j\) ist die Gesamtanzahl an Werten in \(\math{x}\).
+
+Bei der \textbf{Fokussierung} werden höhere Attention-Score-Werte zwischen \(\mathbf{Q}\) und \(\mathbf{K}\) exponentiell bevorzugt.  
+Analog dazu werden niedrigere Attention-Score-Werte exponentiell nach unten bewertet.  
+Bei der zweiten Aufgabe der Softmax-Funktion, der \textbf{Normalisierung}, werden die Attention-Score-Werte pro Score-Vektor in Wahrscheinlichkeiten zwischen \(0\) und \(1\) transformiert, wobei die Summe jedes Attention-Score-Vektors immer \(1\) ist.
+
+Damit die Softmax-Funktion aber optimal funktionieren kann, müssen die Werte in den Attention-Score-Vektoren erst einmal dimensioniert werden.
+Bei geläufigen Transformermodellen wird wie oben beschrieben, ein \( d_{\text{model}} \) von mindestens 512 verwendet.
+Durch diese großen Dimensionen entehen bei der Berechnung von den Attention-Scores durch die Aufsummierung bei der Bildung des Skalarprodukte sehr große Werte.
+Diese großen Werte sorgen dafür, dass die Softmax-Funktion viele Q-K-Beziehungen sehr hoch bewertet und so der Transformer nicht sich auf die tatsächlich vielversprechenden Verbindungen konzentrieren kann und so die Weiterverarbeitung ungenau wird.
+Diese Werte fallen bei dem oben gerechneten Beispiel nicht auf, da hier nur mit einem \( d_{\text{model}} \) von vier gerechnet wird.
+
+Um hohe Attention-Score-Werte zu normalisieren, werden die Attention-Score-Vektor-Werte durch \( \sqrt{d_{\text{model}}} \) geteilt und so für die Softmax-Funktion in einen stabilen Bereich gebracht. \\
+So kann ein Transformer auch kleine Relevanzunterschiede in der Token-Beziehung berücksichtigen.
+Hier beispielsweise für das Attention-Score-Array von \enquote{Bank}:
+
+\[
+\frac{\text{Scores}_{\text{Bank}}}{\sqrt{4}} = [0.585, 1.5075, 1.46, 0.56, 1.49]
+\]
+
+\[
+\text{Softmax}\left(\frac{\text{Scores}_{\text{Bank}}}{\sqrt{4}}\right) = [0.107, 0.269, 0.256, 0.104, 0.264]
+\]
+
+Damit diese nun umgewandelten Attention-Score-Wahrscheinlichkeiten in den weiteren Verarbeitungsschritten berücksichtigt werden können, werden sie mit der \( V \)-Matrix multipliziert. 
+Das zeigt dem Modell, zu wie viel Prozent der erlernten Informationen zu einem Token im nächsten Schritt einfließen.
+Insgesamt sieht das Verfahren folgendermaßen aus:
+
+\[
+\text{Attention}(Q, K, V) = \operatorname{Softmax}\left(\frac{QK^T}{\sqrt{d_{\text{model}}}}\right) V
+\]
+
+%Also werden die finalen die Informationen für Bank \math{V}_{\text{Bank}} folgendermaßen gewichtet:
+
+%\[
+%\math{Z}_{\text{Bank}} = [0.107, 0.269, 0.256, 0.104, 0.264] \cdot [0.9, 0.5, 0.7, 1.0] = [0.9, 0.5, 0.7, 1.0]
+%\]
+
+\section{Multi-Head-Attention}
+
+Um Transformer noch effizienter zu machen, wird das Attention-Prinzip in Form der \textbf{Multi-Head-Attention} angewendet. 
+Dabei beschreibt jeder einzelne Kopf einen eigenen Attention-Zyklus, wie er oben beschrieben wurde.
+
+Jeder Kopf verwendet hierbei unterschiedliche Gewichtungsmatrizen, um den Fokus bei der Analyse der Zusammenhänge zwischen Tokens auf verschiedene Schwerpunkte zu setzen. 
+So kann beispielsweise ein Kopf die Tokens hinsichtlich syntaktischer Beziehungen analysieren, während ein anderer die semantischen Beziehungen betrachtet. 
+Für jeden Attention-Kopf \( h \) werden dabei unterschiedliche Gewichtungsmatrizen \( \mathbf{W}_{Qh} \), \( \mathbf{W}_{Kh} \) und \( \mathbf{W}_{Vh} \) verwendet.
+
+Viele Transformermodelle verwenden acht Attention-Köpfe, die parallel ausgeführt werden.
+Nach der parallelen Verarbeitung werden die jeweiligen Ergebnisse der Köpfe zusammenfügt, auch konkatinieren genannt, und mit Hilfe einer weiteren Gewichtungsmatrix \( \mathbf{W}_{O} \) zusammengefasst.
+\( \mathbf{W}_{O} \) ist hierbei die Matrix, welche die Ergebnisse der Attention-Köpfe nach unterschiedlich gewichtet.
+Umgangssprachlich formuliert, bildet sie eine einheitliche Schlussfolgerung für den Transformer aus diesen Muli-Head-Attention-Zyklus.
+
