@@ -10,6 +10,7 @@ Die andere Komponente, der \textbf{Decoder}, nutzt diese Repräsentation, um pas
 
 Um die Architektur eines Transformers zu verstehen, müssen zunächst die Komponenten betrachtet werden, die überall in der Architektur eingesetzt werden und sich gleich verhalten.
 
+
 \subsection{Multi-Head-Attention}
 
 Wie schon im vorherigen Kapitel beschrieben, ist Self-Attention ein zentraler Baustein in der Transformer-Architektur.  
@@ -28,9 +29,10 @@ Umgangssprachlich formuliert bildet sie eine einheitliche Schlussfolgerung für 
 
 Ein Problem bei der einfachen Verwendung von Self-Attention ist, dass die tatsächliche Reihenfolge der Tokens verloren geht.  
 Der Grund dafür ist, dass die Eingabe für den Algorithmus als eine Menge betrachtet wird, und in einer Menge haben Elemente keine feste Reihenfolge.  
-Das Ergebnis ist somit unabhängig von der Reihenfolge der Tokens, beispielsweise in einem Satz.
+Das Ergebnis ist somit unabhängig von der Reihenfolge der Tokens.
+Der Algorithmus kommt so für die Wortfolge \enquote{Katze jagt Hund} und \enquote{Hund jagt Katze} zum den gleichen Ergebnis, obwohl die semantische Bedeutung offensichtlich eine andere ist. 
 
-Hier kommt das \enquote{Positional Encoding} ins Spiel.  
+Hier kommt das \textbf{Positional Encoding} ins Spiel.  
 Dabei werden zu den ursprünglichen Embeddings, die aus den Tokens generiert wurden, Positionsdaten hinzugefügt, die der Transformer erkennen kann.  
 Hierfür verwendet man abwechselnd Sinus- und Cosinus-Funktionen:
 
@@ -39,9 +41,52 @@ PE_{(pos, 2i)} = \sin\left(\frac{\text{pos}}{10000^{\frac{2i}{d_{\text{model}}}}
 PE_{(pos, 2i+1)} = \cos\left(\frac{\text{pos}}{10000^{\frac{2i}{d_{\text{model}}}}}\right)
 \]
 
-Hierbei ist \( \text{pos} \) die Position des Tokens, \( i \) ist die aktuell zu betrachtende Dimension für diesen Token, und \( d_{\text{model}} \) ist die Anzahl der Dimensionen im Modell.
+Hierbei ist \( \text{pos} \) die Position des Tokens in der Wortfolge, \( i \) ist die aktuell zu betrachtende Dimension für diesen Token, und \( d_{\text{model}} \) ist die Anzahl der Dimensionen im Model.
 
 Die unterschiedlichen Frequenzen der Sinus- und Cosinus-Funktionen ermöglichen es, dass jede Dimension des Embeddings anders auf die Position reagiert.  
 Sinus und Cosinus haben eine periodische Struktur, die es dem Transformer erlaubt, die Position der Tokens in der ursprünglichen Eingabe sowie die Positionsunterschiede zwischen Tokens zu ermitteln.  
-Die abwechselnde Verwendung dieser Funktionen erleichtert die Berechnung der relativen Unterschiede zwischen zwei Positionen.  
-Sie sind orthogonal zueinander, was bedeutet, dass sie sich nie überlagern und somit unabhängige Informationen darstellen.
+Die abwechselnde Verwendung dieser Funktionen sorgt dafür, dass sie sich nie überlagern und somit unabhängige Informationen darstellen.
+
+\subsection{Addition und Normalisierung}
+
+Die Addition-und-Normalisierung-Komponente bewahrt originale Eingabeinformationen, die durch die schrittweise Verarbeitung im Transformer verloren gehen könnten. 
+Nach jeder Verarbeitung, beispielsweise durch die Multi-Head-Attention, werden die Ausgabewerte mit den ursprünglichen Eingabewerten \( x_i \) addiert. 
+Dadurch stehen auch für nachfolgende Komponenten die Originalinformationen weiterhin zur Verfügung.
+
+\[
+z_i = x_i + \text{SubkomponentenOutput}_i
+\]
+
+Bei der Normalisierung wird berechnet, wie viele Standardabweichungen ein Wert \( z_i \) vom Mittelwert entfernt ist. 
+Dadurch werden die Werte standardisiert, indem die Verteilung zentriert (Mittelwert \( \mu \) wird 0) und skaliert (Standardabweichung \( \sigma \) wird 1) wird. 
+Anschließend werden die Werte abhängig vom Modelltraining durch Streckung (mit \( \gamma \)) und Verschiebung (mit \( \beta \)) angepasst. Diese Anpassung macht die Normalisierung flexibel und trainierbar.
+
+\[
+\hat{z}_i = \frac{z_i - \mu}{\sigma}
+\]
+\[
+y_i = \gamma \cdot \hat{z}_i + \beta
+\]
+
+\subsection{Feed-Forward-Schicht}
+
+Während \textbf{Multi-Head-Attention} lineare Zusammenhänge zwischen Tokens berechnet, benötigt der Transformer eine zusätzliche Komponente, um nicht-lineare Zusammenhänge zu erfassen. 
+Hierfur wird die \textbf{Feed-Forward-Schicht} verwendet, die die addierten und normalisierten Ergebnisse aus der Multi-Head-Attention-Schicht weiterverarbeitet.
+
+Die Feed-Forward-Schicht ist ein neuronales Netzwerk, das aus zwei linearen Transformationen mit einer nicht-linearen Aktivierungsfunktion in der Mitte besteht.
+Im ersten Schritt wird die Eingabematrix mit der Gewichtungsmatrix \( W_1 \) multipliziert, was die erste Schicht des neuronalen Netzes darstellt. Dabei entsteht eine Matrix mit viermal so vielen Dimensionen wie der Eingabematrix, die anschließend um einen Bias-Wert \( b_1 \) erweitert wird.
+Danach wird die erste Schicht durch die nicht-lineare Aktivierungsfunktion \textbf{ReLU} (eng. Rectified Linear Unit) mit der zweiten Schicht verbunden. 
+Die ReLU-Funktion hat eine einfache nicht-lineare Eigenschaft: Wenn ein Eingabewert negativ ist, wird er zu 0; wenn er positiv ist, bleibt er unverändert und es bleibt bei einem linearen Zusammenhang:
+
+\[
+\text{ReLU}(x) = \max(0, x)
+\]
+
+Somit werden nur die positiven Werte in der weiteren Verarbeitung berücksichtigt.
+
+In der zweiten Schicht werden die Werte aus der ReLU-Funktion mit der zweiten Gewichtungsmatrix \( W_2 \) multipliziert und somit wieder auf die ursprüngliche Eingabegröße skaliert. 
+Auch hier wird der resultierende Vektor durch einen Bias-Wert \( b_2 \) ergänzt.
+Insgesamt kann die Feed-Forward-Schicht mathematisch so ausgedrückt werden: 
+\[
+\text{Feed-Forward}(x) = \text{ReLU}(W_1 x + b_1) W_2 + b_2
+\]
