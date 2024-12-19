@@ -1,17 +1,9 @@
 \chapter{Transformer-Architektur im Detail}
 
-Im ursprünglichen Werk \textit{Attention Is All You Need} \todo{cite}, in dem das grundlegende Transformer-Modell vorgestellt wurde, besteht ein Transformer aus zwei Hauptkomponenten: dem Encoder und dem Decoder.
+Im ursprünglichen Werk \textit{Attention Is All You Need} \todo{cite}, in dem das grundlegende Transformer-Architektur vorgestellt wurde, besteht ein Transformer aus zwei Hauptmodulen: dem Encoder und dem Decoder.
+Um die Architektur eines Transformers besser zu verstehen, müssen zunächst die Komponenten betrachtet werden, die in Encoder und Decoder eingesetzt werden.
 
-Der \textbf{Encoder} übersetzt die Eingabewörter in eine abstrahierte Repräsentation.  
-Ziel ist es hierbei, die semantischen und syntaktischen Informationen des Textes zu extrahieren und zu kodieren.  
-Die andere Komponente, der \textbf{Decoder}, nutzt diese Repräsentation, um passende Outputs zu generieren. Dabei berechnet er in jeder Iteration den nächstbesten Token, der zum Output hinzugefügt werden soll. Hierbei bezieht er auch den zuletzt generierten Token in die Berechnung des nächsten Tokens ein.
-
-\section{Komponenten in einem Transformer}
-
-Um die Architektur eines Transformers zu verstehen, müssen zunächst die Komponenten betrachtet werden, die überall in der Architektur eingesetzt werden und sich gleich verhalten.
-
-
-\subsection{Multi-Head-Attention}
+\section{Multi-Head-Attention}
 
 Wie schon im vorherigen Kapitel beschrieben, ist Self-Attention ein zentraler Baustein in der Transformer-Architektur.  
 Um Transformer noch effizienter zu gestalten, wird Self-Attention in Form der \textbf{Multi-Head-Attention} angewendet. Dabei beschreibt jeder einzelne Kopf einen eigenen Attention-Zyklus, wie oben beschrieben.
@@ -25,7 +17,7 @@ Nach der parallelen Verarbeitung werden die jeweiligen Ergebnisse der Köpfe zus
 \( \mathbf{W}_{O} \) ist die Matrix, welche die Ergebnisse der Attention-Köpfe unterschiedlich gewichtet.  
 Umgangssprachlich formuliert bildet sie eine einheitliche Schlussfolgerung für den Transformer aus dem Multi-Head-Attention-Zyklus.
 
-\subsection{Positional Encodings}
+\section{Positional Encodings}
 
 Ein Problem bei der einfachen Verwendung von Self-Attention ist, dass die tatsächliche Reihenfolge der Tokens verloren geht.  
 Der Grund dafür ist, dass die Eingabe für den Algorithmus als eine Menge betrachtet wird, und in einer Menge haben Elemente keine feste Reihenfolge.  
@@ -47,7 +39,7 @@ Die unterschiedlichen Frequenzen der Sinus- und Cosinus-Funktionen ermöglichen 
 Sinus und Cosinus haben eine periodische Struktur, die es dem Transformer erlaubt, die Position der Tokens in der ursprünglichen Eingabe sowie die Positionsunterschiede zwischen Tokens zu ermitteln.  
 Die abwechselnde Verwendung dieser Funktionen sorgt dafür, dass sie sich nie überlagern und somit unabhängige Informationen darstellen.
 
-\subsection{Addition und Normalisierung}
+\section{Addition und Normalisierung}
 
 Die Addition-und-Normalisierung-Komponente bewahrt originale Eingabeinformationen, die durch die schrittweise Verarbeitung im Transformer verloren gehen könnten. 
 Nach jeder Verarbeitung, beispielsweise durch die Multi-Head-Attention, werden die Ausgabewerte mit den ursprünglichen Eingabewerten \( x_i \) addiert. 
@@ -68,7 +60,7 @@ Anschließend werden die Werte abhängig vom Modelltraining durch Streckung (mit
 y_i = \gamma \cdot \hat{z}_i + \beta
 \]
 
-\subsection{Feed-Forward-Schicht}
+\section{Feed-Forward-Schicht}
 
 Während \textbf{Multi-Head-Attention} lineare Zusammenhänge zwischen Tokens berechnet, benötigt der Transformer eine zusätzliche Komponente, um nicht-lineare Zusammenhänge zu erfassen. 
 Hierfur wird die \textbf{Feed-Forward-Schicht} verwendet, die die addierten und normalisierten Ergebnisse aus der Multi-Head-Attention-Schicht weiterverarbeitet.
@@ -93,6 +85,51 @@ Insgesamt kann die Feed-Forward-Schicht mathematisch so ausgedrückt werden:
 
 \section{Encoder}
 
+Der \textbf{Encoder} übersetzt die Eingabewörter in eine abstrahierte Repräsentation.  
+Ziel ist es hierbei, die semantischen und syntaktischen Informationen des Textes zu extrahieren und zu kodieren.  
+
+Am Beginn jeder Textverarbeitung wird, wie auch im \todo{verweise} Self-Attention Kapitel beschrieben, der Eingabetext tokenisiert und in Embeddings umgewandelten.
+Anschließend werden einmalig Positional-Encodings hinzugefügt, die Positionsdaten der Tokens im Eingabetext ergänzen.
+
+Nun werden diese Embedding-Informationen an die erste Encoder-Schicht weitergeleitet.
+Ein Encoder hat laut Literatur mindestens 6 Encoder-Schichten.
+In einer Encoder-Schicht wird zunächst Multi-Head-Attention angewendet.
+Das Ergebnis der Multi-Head-Attention, also die relevanten, weiterzuanalysierenden Informationen über Tokens werden mit den ursprünglichen Eingabe-Embeddings der Encoder-Schicht der Addition und Normalisierung unterzogen.
+
+Im zweiten Teil der Encoder-Schicht werden die Werte dann mit Feed-Forward-Komponente weiterverarbeitet.
+Am Schluss werden diese weiterverarbeiteten Werte nocheinmal mit den Werten vor der Feed-Forward-Komponente addiert und normalisiert. 
+Nun werden die Werte an die nächste Encoder-Schicht weitergegeben, welche die Prozedur wiederholt.
+
+Nach der letzten Schicht liefert der Encoder eine kontextbewusste Darstellung der Eingabesequenz, in der jedes Token nicht nur seine ursprüngliche Bedeutung, sondern auch die relevanten Zusammenhänge mit anderen Tokens der Sequenz berücksichtigt.
+Nun können diese Informationen an den Decoder weitergegeben werden.
+
 \section{Decoder}
 
-\subsection{Cross-Attention}
+Der \textbf{Decoder} ist die zweite Komponente des Modells und nutzt die abstrahierte Repräsentation des Encoders, um passende Outputs zu generieren. 
+In jeder Iteration berechnet er das nächste Token, das zum Output hinzugefügt werden soll, wobei er den zuletzt generierten Token als zusätzlichen Kontext berücksichtigt.
+
+Zu Beginn eines Decoder-Zyklus wird, analog zum Encoder, der Eingabetext in Embeddings umgewandelt und mithilfe des Positional Encodings mit Positionsinformationen angereichert. 
+Der Unterschied liegt jedoch darin, dass der Eingabetext in der ersten Iteration des Decoders nur aus einem \enquote{Start-Token} besteht, da noch keine weiteren Tokens generiert wurden. 
+Diese initialen Embeddings werden dann an die Decoder-Schichten weitergeleitet, wo die eigentliche Verarbeitung stattfindet.
+
+Im ersten Schritt jeder Decoder-Schicht wird eine spezielle Variante von Multi-Head-Attention angewendet: die \textbf{Masked Multi-Head Attention}. 
+Hierbei werden zukünftige Tokens durch eine Maske verdeckt, sodass der Decoder nur bereits generierte Tokens verwenden kann. 
+Dies verhindert, dass der Decoder Informationen vorwegnimmt.  
+Während des Trainings wird der Decoder mit der gesamten Zielsequenz versorgt, wobei durch Maskierung nur bereits bekannte Tokens sichtbar sind. Dies simuliert den schrittweisen Vorhersageprozess.  
+Die Ergebnisse der Masked Multi-Head Attention werden anschließend mit den ursprünglichen Eingabewerten addiert und normalisiert.
+
+Im zweiten Schritt wird erneut Multi-Head Attention angewendet, allerdings in einer modifizierten Form, die als \textbf{Cross-Attention} bezeichnet wird. 
+Hier werden die Queries (\( Q \)) regulär aus den Embeddings des Decoders berechnet, während die Keys (\( K \)) und Values (\( V \)) aus den Ergebnissen des Encoders stammen. 
+Durch die separaten \( K \) und \( V \) aus dem Encoder kann der Decoder die im Eingabetext gespeicherten Kontextinformationen nutzen, um die Ausgabe gezielt zu steuern. 
+Dies ist besonders wichtig, wenn der Eingabetext viele Details enthält, die in der Antwort berücksichtigt werden müssen.  
+Die Ergebnisse der Cross-Attention werden ebenfalls addiert und normalisiert.
+
+Im dritten Schritt durchlaufen die Werte eine Feed-Forward-Schicht, die die Berechnungen weiter verfeinert. 
+Auch hier folgt eine Addition mit den ursprünglichen Werten und eine Normalisierung.
+
+Die resultierenden Embeddings werden entweder an die nächste Decoder-Schicht weitergeleitet, um den Prozess zu wiederholen, oder sie werden für die Ausgabe vorbereitet. 
+Bei der Ausgabe wird jedes Embedding einem Token aus dem Vokabular zugeordnet, das als ganze natürliche Zahl dargestellt wird. 
+Anschließend berechnet die Softmax-Funktion die Wahrscheinlichkeiten für alle möglichen Tokens und erzeugt dabei eine Wahrscheinlichkeitsverteilung über das gesamte Vokabular. 
+Das Token mit der höchsten Wahrscheinlichkeit wird ausgewählt und zur finalen Ausgabe hinzugefügt. 
+Dieses neue Token wird dann als Eingabe in den nächsten Decoder-Zyklus eingespeist. 
+Der Vorgang wird fortgesetzt, bis der Decoder ein \enquote{End of Sequence}-Token (\textit{EOS}) generiert, das das Ende der Ausgabe markiert.
