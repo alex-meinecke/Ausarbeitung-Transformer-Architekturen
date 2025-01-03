@@ -1,2 +1,31 @@
 \chapter{Grundlagen}
 
+Um zu verstehen, wie Transformer funktionieren, muss zunächst ein kurzer Überblick über neuronale Netze gegeben werden.  
+
+\section{Neuronale Netze}
+
+Neuronale Netze sind ein Teilgebiet des maschinellen Lernens.  
+Sie sind trainierbar und können die gesammelten Erfahrungen auf neue Daten anwenden.  
+Neuronale Netze simulieren dabei den Aufbau des menschlichen Gehirns.  
+Sie bestehen aus mehreren Schichten von Neuronen.  
+
+Es gibt dabei eine Eingabe- und Ausgabeschicht sowie mehrere versteckte Schichten, in denen die eigentliche Verarbeitung stattfindet.  
+Jedes Neuron verarbeitet seine eigenen Daten, gewichtet sie und addiert sie mit den Ergebnissen der vorherigen Schicht.  
+Dieses Ergebnis wird dann an die Aktivierungsfunktion weitergegeben, um die nächsten verbundenen Neuronen anzusteuern.  
+Diese Funktion bestimmt, ob das Neuron \enquote{feuert} und das Signal weitergeleitet wird.  
+
+Über die Jahre haben sich neuronale Netze besonders für Anwendungen wie Bildanalysen als äußerst effektiv erwiesen.  
+Doch ein Problem war lange die Textanalyse und -verarbeitung.  
+Hier besteht die Herausforderung darin, dass Informationen nicht wie bei einem Bild simultan erfasst werden können.  
+Um den Sinn eines Satzes zu verstehen, muss der Inhalt schrittweise verarbeitet werden.  
+
+\section{Neuronale Netze für Textverarbeitung}
+
+Für Textanalysen, Übersetzungen oder Zusammenfassungen wurden lange Zeit Recurrent Neural Networks (RNNs) verwendet.  
+RNNs analysieren einen Text sequentiell und verknüpfen jedes Wort mit dem Kontext aus dem vorhergehenden Wort.  
+
+Doch RNNs haben Schwächen.  
+Sie haben Schwierigkeiten, den Kontext von größeren Texten vollständig zu erfassen.  
+Außerdem ist die sequentielle Verarbeitung ineffizient und schlecht auf moderne Hardware optimiert, die auf Parallelverarbeitung ausgelegt ist.  
+
+Um diese Probleme zu lösen, wurde eine neue Art von neuronalen Netzen entwickelt: der Transformer.  

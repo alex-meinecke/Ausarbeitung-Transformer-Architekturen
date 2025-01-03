@@ -20,7 +20,7 @@ Umgangssprachlich formuliert bildet sie eine einheitliche Schlussfolgerung für 
 \section{Positional Encodings}
 
 Ein Problem bei der einfachen Verwendung von Self-Attention ist, dass die tatsächliche Reihenfolge der Tokens verloren geht.  
-Der Grund dafür ist, dass die Eingabe für den Algorithmus als eine Menge betrachtet wird, und in einer Menge haben Elemente keine feste Reihenfolge.  
+Der Grund dafür ist, dass bei dem Self-Attention-Algorithmus alle Zusammenhänge zwischen Token parallel ermittelt werden und nicht Wort für Wort.   
 Das Ergebnis ist somit unabhängig von der Reihenfolge der Tokens.
 Der Algorithmus kommt so für die Wortfolge \enquote{Katze jagt Hund} und \enquote{Hund jagt Katze} zum den gleichen Ergebnis, obwohl die semantische Bedeutung offensichtlich eine andere ist. 
 
