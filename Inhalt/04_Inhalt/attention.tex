@@ -16,7 +16,6 @@ Jedes dieser Wörter ist ein eigener Token, der vor der Eingabe in den Attention
 \enquote{[SEP]} trennt verschiedene Teile dieser Eingabesequenz.
 Diese Tokens sehen für das Model wie folgt aus: [101, 22564, 4133, 4371, 21200, 4315, 2924, 102].
 Die Herausforderung für den Transformer besteht darin, aus dem Kontext der anderen Tokens zu erkennen, ob \enquote{Bank} eine Sitzbank oder das Finanzinstitut Bank bedeutet.
-
 Jeder Token bildet ein Schlüssel-Werte-Paar.
 Der korrespondierende Wert hinter einem Token ist ein Vektor, der die Bedeutung eines Tokens hinsichtlich mehrerer Dimensionen beschreibt.  
 Diese Vektoren sind aus Trainingsdaten des Transformer-Modells entstanden.
@@ -32,18 +31,20 @@ Wenn sich Tokens im Vektorraum nahe liegen, haben sie eher Gemeinsamkeiten im Ve
 Angenommen, es gäbe nur ein \( d_{\text{model}} = 2 \) für jeden Token, könnten diese zwei Dimensionen als Koordinaten genutzt werden, um Zusammenhänge visuell als Cluster in einem Koordinatensystem darzustellen.  
 Hier wären beispielsweise die Tokens \enquote{Hund} und \enquote{Katze} nah beieinander.
 
-Für das oben genannte Beispiel \enquote{Ich sitze auf der Bank} nehmen wir der Übersichtlichkeit halber ein \( d_{\text{model}} = 4 \).  
-So ergibt sich eine Embedding-Matrix $\mathbf{X}$ mit 5 Zeilen für 5 Tokens und 4 Spalten für jeweils 4 Dimensionen:
+Für das oben genannte Beispiel nehmen wir der Übersichtlichkeit halber ein \( d_{\text{model}} = 4 \).  
+So ergibt sich eine Embedding-Matrix $\mathbf{X}$ mit 8 Zeilen für 8 Tokens und 768 Spalten für jeweils 768 Dimensionen, die hier der Übersicht halber gekürzt wurden:
 
 \[
-\centering
 \mathbf{X} =
 \begin{bmatrix}
-0.4 & 0.8 & 1.5 & 1.6 \\
-3.2 & 0.4 & 0.7 & 0.2 \\
-0.6 & 0.9 & 1.2 & 0.5 \\
-2.1 & 0.5 & 2.0 & 0.2 \\
-0.7 & 2.4 & 0.1 & 0.9
+-0.2439 & 0.3586 & -0.2497 & -0.1406 & -0.2737 & \dots \\
+-0.7505 & 0.3196 & 0.5110 & -0.1967 & -0.5406 & \dots \\
+-0.2983 & -0.8887 & 0.8590 & -0.9268 & 0.2663 & \dots \\
+-0.7102 & -0.5600 & 0.2318 & 0.6554 & 0.6488 & \dots \\
+-0.5666 & 0.2437 & 0.3031 & -0.7440 & 0.0285 & \dots \\
+-0.7811 & -0.7468 & 0.1563 & 0.0889 & 0.2810 & \dots \\
+-0.3230 & -0.5498 & -0.2570 & -0.1799 & 0.4774 & \dots \\
+0.6908 & 0.2889 & -0.2512 & 0.4846 & -0.7107 & \dots \\
 \end{bmatrix}
 \]
 
@@ -68,16 +69,6 @@ Die drei Matrizen haben im Attention-Zyklus umgangssprachlich formuliert folgend
     \item \textbf{Key-Matrix (\(\mathbf{K}\))}: Welche Tokens im Kontext antworten am besten auf die Frage?
     \item \textbf{Value-Matrix (\(\mathbf{V}\))}: Erlernten Informationen über ein Token.
 \end{itemize}
-
-Im Beispiel könnten die jeweiligen Zeilen der Matrizen \(\mathbf{Q}\), \(\mathbf{K}\), \(\mathbf{V}\) für das Token \enquote{Bank} folgendermaßen aussehen:
-
-\[
-\begin{aligned}
-\math{Q}_{\text{Bank}} &= [1.0, 0.7, 0.9, 1.1], \quad 
-\math{K}_{\text{Bank}} &= [0.8, 0.6, 1.0, 0.9], \quad 
-\math{V}_{\text{Bank}} &= [0.9, 0.5, 0.7, 1.0]
-\end{aligned}
-\]
 
 \section{Berechnung und Einbeziehung von Attention-Scores}
 

@@ -24,30 +24,30 @@ with torch.no_grad():
     outputs = model(**inputs)
     embeddings = outputs.last_hidden_state  # (1, seq_len, hidden_size)
 
-# 4. Embeddingmatrix anzeigen (Ausschnitt)
+# 4. Embeddingmatrix anzeigen (Dimensionen verkleinert)
 embedding_matrix = embeddings.squeeze(0).numpy()
-embedding_subset = embedding_matrix[:5, :5]  # Zeige nur einen Ausschnitt der Matrix
-print("Ausschnitt der Embedding-Matrix:")
-print(embedding_subset)
+embedding_reduced = embedding_matrix[:, :5]  # Reduziere die Dimensionen (z.B. nur die ersten 5 Dimensionen)
+print("Embedding-Matrix mit reduzierten Dimensionen:")
+print(embedding_reduced)
 
 # Visualisierung der Embeddingmatrix
 plt.figure(figsize=(8, 6))
-sns.heatmap(embedding_subset, annot=True, cmap='viridis')
-plt.title('Ausschnitt der Token Embedding Matrix')
+sns.heatmap(embedding_reduced, annot=True, cmap='viridis')
+plt.title('Token Embedding Matrix (reduzierte Dimensionen)')
 plt.xlabel('Embedding Dimensionen (Ausschnitt)')
-plt.ylabel('Tokens (Ausschnitt)')
-plt.savefig('token_embedding_matrix_subset.png')
+plt.ylabel('Tokens')
+plt.savefig('token_embedding_matrix_reduced.png')
 plt.close()
-print("Embeddingmatrix-Ausschnitt gespeichert als 'token_embedding_matrix_subset.png'")
+print("Embeddingmatrix gespeichert als 'token_embedding_matrix_reduced.png'")
 
 # 5. Query, Key, Value durch lineare Projektionen erzeugen
-W_Q = torch.nn.Linear(768, 64)
-W_K = torch.nn.Linear(768, 64)
-W_V = torch.nn.Linear(768, 64)
+W_Q = torch.nn.Linear(768, 768)
+W_K = torch.nn.Linear(768, 768)
+W_V = torch.nn.Linear(768, 768)
 
-Q = W_Q(embeddings)  # (1, seq_len, 64)
-K = W_K(embeddings)  # (1, seq_len, 64)
-V = W_V(embeddings)  # (1, seq_len, 64)
+Q = W_Q(embeddings)
+K = W_K(embeddings)
+V = W_V(embeddings)
 
 # 6. Attention Scores berechnen
 attention_scores = torch.matmul(Q, K.transpose(-2, -1)) / np.sqrt(64)
