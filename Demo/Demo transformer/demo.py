@@ -7,8 +7,8 @@ import seaborn as sns
 import matplotlib.cm as cm
 
 # 1. Initialisierung von Tokenizer und Modell
-tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-model = BertModel.from_pretrained('bert-base-uncased')
+tokenizer = BertTokenizer.from_pretrained('bert-base-german-cased')
+model = BertModel.from_pretrained('bert-base-german-cased')
 
 # 2. Eingabesatz
 sentence = "Ich sitze auf der Bank"
@@ -32,9 +32,9 @@ print(embedding_reduced)
 
 # Visualisierung der Embeddingmatrix
 plt.figure(figsize=(8, 6))
-sns.heatmap(embedding_reduced, annot=True, cmap='viridis')
+sns.heatmap(embedding_reduced, annot=True, cmap='viridis', xticklabels=[f'Dim {i+1}' for i in range(embedding_reduced.shape[1])])
 plt.title('Token Embedding Matrix (reduzierte Dimensionen)')
-plt.xlabel('Embedding Dimensionen (Ausschnitt)')
+plt.xlabel('Embedding Dimensionen')
 plt.ylabel('Tokens')
 plt.savefig('token_embedding_matrix_reduced.png')
 plt.close()
@@ -64,30 +64,60 @@ plt.savefig('attention_matrix_heatmap.png')
 plt.close()
 print("Attention-Heatmap gespeichert als 'attention_matrix_heatmap.png'")
 
-# 8. Token-Verbindungen visualisieren
+# 8. Token-Verbindungen visualisieren für jeden Token
+for i in range(len(tokens)):
+    fig, ax = plt.subplots(figsize=(12, 12))
+    y_positions = np.arange(len(tokens) - 1, -1, -1)
+
+    # Zeichnen der Punkte und Verbindungen für den aktuellen Token
+    ax.scatter(np.zeros(len(tokens)), y_positions, c='black', s=100)
+    ax.scatter(np.ones(len(tokens)), y_positions, c='black', s=100)
+
+    cmap = cm.viridis
+    norm = plt.Normalize(vmin=np.min(attention_matrix), vmax=np.max(attention_matrix))
+
+    # Zeichnen der Verbindungen für den aktuellen Token
+    for j in range(len(tokens)):
+        weight = attention_matrix[i, j]
+        if weight > 0.1:  # Threshold für darzustellende Verbindungen
+            color = cmap(norm(weight))
+            ax.plot([0, 1], [y_positions[i], y_positions[j]], color=color, lw=2)
+            ax.text(0.5, (y_positions[i] + y_positions[j]) / 2, f'{weight:.2f}', ha='center', va='center', fontsize=10)
+
+    ax.set_yticks(y_positions)
+    ax.set_yticklabels(tokens)
+    ax.set_xticks([0, 1])
+    ax.set_xticklabels(['Links', 'Rechts'])
+    plt.title(f'Token-Verbindungen mit Attention Scores für Token {tokens[i]}')
+    plt.savefig(f'token_{tokens[i]}_connections_with_attention_scores.png')
+    plt.close()
+    print(f"Token-Verbindungen für {tokens[i]} gespeichert als 'token_{tokens[i]}_connections_with_attention_scores.png'")
+
+# 9. Alle Token-Verbindungen auf einmal visualisieren
 fig, ax = plt.subplots(figsize=(12, 12))
 y_positions = np.arange(len(tokens) - 1, -1, -1)
+
+# Zeichnen der Punkte für die Tokens
 ax.scatter(np.zeros(len(tokens)), y_positions, c='black', s=100)
 ax.scatter(np.ones(len(tokens)), y_positions, c='black', s=100)
 
 cmap = cm.viridis
 norm = plt.Normalize(vmin=np.min(attention_matrix), vmax=np.max(attention_matrix))
 
+# Zeichnen der Verbindungen zwischen allen Token-Paaren
 for i in range(len(tokens)):
     for j in range(len(tokens)):
         weight = attention_matrix[i, j]
-        if weight > 0.05:
+        if weight > 0.1:  # Threshold für darzustellende Verbindungen
             color = cmap(norm(weight))
             ax.plot([0, 1], [y_positions[i], y_positions[j]], color=color, lw=2)
-            ax.text(0.5, (y_positions[i] + y_positions[j]) / 2, f'{weight:.2f}', ha='center', va='center', fontsize=10)
 
+# Achsenticks und -labels
 ax.set_yticks(y_positions)
 ax.set_yticklabels(tokens)
 ax.set_xticks([0, 1])
 ax.set_xticklabels(['Links', 'Rechts'])
-plt.title('Token-Verbindungen mit Attention Scores')
-plt.savefig('token_connections_with_attention_scores.png')
+plt.title('Alle Token-Verbindungen')
+plt.savefig('all_token_connections.png')
 plt.close()
-print("Token-Verbindungen gespeichert als 'token_connections_with_attention_scores.png'")
-
-print("Alle Visualisierungen wurden erfolgreich gespeichert.")
+print("Alle Token-Verbindungen mit Attention Scores gespeichert als 'all_token_connections_with_attention_scores.png'")
