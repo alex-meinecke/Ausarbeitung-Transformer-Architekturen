@@ -9,12 +9,15 @@ Jeder Token ist einzigartig und wird zunächst nur durch eine natürliche Zahl r
 
 Grundlage jedes Attention-Zyklus sind Eingabe-Tokens.  
 Um die mathematische Vorgehensweise besser zu veranschaulichen, wird im Folgenden der Satz \enquote{Ich sitze auf der Bank} als Beispiel verarbeitet.
-Jedes dieser Wörter ist ein eigener Token, der vor der Eingabe in den Attention-Zyklus vom Transformer übersetzt wurde:
-[\enquote{Ich}, \enquote{sitze}, \dots, \enquote{Bank}].  
-Diese Tokens könnten für das Modell wie folgt aussehen: [\enquote{243}, \enquote{645}, \dots, \enquote{316}].
+Dafür wird auf das Transformer-Model \enquote{BERT} zurückgegriffen.
+Jedes dieser Wörter ist ein eigener Token, der vor der Eingabe in den Attention-Zyklus vom Transformer übersetzt wird:
+[\enquote{[CLS]}, \enquote{ich}, \enquote{sit}, \enquote{##ze}, \enquote{auf}, \enquote{der}, \enquote{bank}, \enquote{[SEP]}].  
+\enquote{[CLS]} ist ein Klassifizierungstoken, der am Anfang jeder Eingabesequenz eingefügt wird.
+\enquote{[SEP]} trennt verschiedene Teile dieser Eingabesequenz.
+Diese Tokens sehen für das Model wie folgt aus: [101, 22564, 4133, 4371, 21200, 4315, 2924, 102].
 Die Herausforderung für den Transformer besteht darin, aus dem Kontext der anderen Tokens zu erkennen, ob \enquote{Bank} eine Sitzbank oder das Finanzinstitut Bank bedeutet.
 
-Jeder Token bildet ein Schlüssel-Werte-Paar.  
+Jeder Token bildet ein Schlüssel-Werte-Paar.
 Der korrespondierende Wert hinter einem Token ist ein Vektor, der die Bedeutung eines Tokens hinsichtlich mehrerer Dimensionen beschreibt.  
 Diese Vektoren sind aus Trainingsdaten des Transformer-Modells entstanden.
 
