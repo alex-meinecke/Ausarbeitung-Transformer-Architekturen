@@ -84,8 +84,16 @@ for i in range(len(tokens)):
             ax.plot([0, 1], [y_positions[i], y_positions[j]], color=color, lw=2)
             ax.text(0.5, (y_positions[i] + y_positions[j]) / 2, f'{weight:.2f}', ha='center', va='center', fontsize=10)
 
+    # Token-Namen nur an der Y-Achse links anbringen
+    for idx, token in enumerate(tokens):
+        ax.text(-0.1, y_positions[idx], token, ha='center', va='center', fontsize=12, color='black')
+
+    # Token-Namen an der Y-Achse auf der rechten Seite anbringen
+    for idx, token in enumerate(tokens):
+        ax.text(1.1, y_positions[idx], token, ha='center', va='center', fontsize=12, color='black')
+
     ax.set_yticks(y_positions)
-    ax.set_yticklabels(tokens)
+    ax.set_yticklabels([])  # Entferne die Y-Achsenbeschriftungen, da die Tokens jetzt manuell hinzugefügt werden
     ax.set_xticks([0, 1])
     ax.set_xticklabels(['Links', 'Rechts'])
     plt.title(f'Token-Verbindungen mit Attention Scores für Token {tokens[i]}')
@@ -112,9 +120,17 @@ for i in range(len(tokens)):
             color = cmap(norm(weight))
             ax.plot([0, 1], [y_positions[i], y_positions[j]], color=color, lw=2)
 
+# Token-Namen nur an der Y-Achse links anbringen
+for idx, token in enumerate(tokens):
+    ax.text(-0.1, y_positions[idx], token, ha='center', va='center', fontsize=12, color='black')
+
+# Token-Namen an der Y-Achse auf der rechten Seite anbringen
+for idx, token in enumerate(tokens):
+    ax.text(1.1, y_positions[idx], token, ha='center', va='center', fontsize=12, color='black')
+
 # Achsenticks und -labels
 ax.set_yticks(y_positions)
-ax.set_yticklabels(tokens)
+ax.set_yticklabels([])  # Entferne die Y-Achsenbeschriftungen, da die Tokens jetzt manuell hinzugefügt werden
 ax.set_xticks([0, 1])
 ax.set_xticklabels(['Links', 'Rechts'])
 plt.title('Alle Token-Verbindungen')
