@@ -1,8 +1,7 @@
-\chapter{Die Funktionsweise von Self-Attention}
+\chapter{Die Funktionsweise von Scaled Dot-Product Attention}
 
-Transformer arbeiten mit dem zentralen Baustein Self-Attention.
-Umgesetzt wird diese Self-Attention mit der \enquote{Scaled Dot-Product Attention} (vgl. \cite[S. 4]{attention}).
-Self-Attention ist ein Algorithmus der letztendlich Zusammenhänge zwischen Wörtern z.B. in einem Text aufzeigt.
+Transformer arbeiten mit dem zentralen Baustein die Scaled Dot-Product Attention (vgl. \cite[S. 4]{attention}).
+dies ist ein Algorithmus der letztendlich Zusammenhänge zwischen Wörtern z.B. in einem Text aufzeigt.
 Wörter werden in Form von Tokens verarbeitet, die ganze Wörter oder Wortteile sein können.
 Jeder Token ist einzigartig und wird zunächst nur durch eine natürliche Zahl repräsentiert.
 
@@ -100,7 +99,7 @@ Einmal ist das die Fokussierung und Normalisierung der Attentionscores mit der \
 
 Bei der \textbf{Fokussierung} werden höhere Attention-Score-Werte zwischen \(\mathbf{Q}\) und \(\mathbf{K}\) exponentiell bevorzugt.  
 Analog dazu werden niedrigere Attention-Score-Werte exponentiell nach unten bewertet.  
-Bei der zweiten Aufgabe der Softmax-Funktion, der \textbf{Normalisierung}, werden die Attention-Score-Werte pro Score-Vektor in Wahrscheinlichkeiten zwischen \(0\) und \(1\) transformiert, wobei die Summe jedes Attention-Score-Vektors immer \(1\) ist (vgl. \cite[K. II.B]{attention}).
+Bei der zweiten Aufgabe der Softmax-Funktion, der \textbf{Normalisierung}, werden die Attention-Score-Werte pro Score-Vektor in Wahrscheinlichkeiten zwischen \(0\) und \(1\) transformiert, wobei die Summe jedes Attention-Score-Vektors immer \(1\) ist (vgl. \cite[K. II.B]{ieee}).
 
 Damit die Softmax-Funktion aber optimal funktionieren kann, müssen die Werte in den Attention-Score-Vektoren erst einmal \enquote{dimensioniert} werden.
 Bei geläufigen Transformermodellen wird wie oben beschrieben, ein \( d_{\text{model}} \) von mindestens 512 verwendet.
