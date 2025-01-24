@@ -22,11 +22,11 @@ print("Tokens:", tokens)
 # 3. Extrahiere Embeddings
 with torch.no_grad():
     outputs = model(**inputs)
-    embeddings = outputs.last_hidden_state  # (1, seq_len, hidden_size)
+    embeddings = outputs.last_hidden_state
 
 # 4. Embeddingmatrix anzeigen (Dimensionen verkleinert)
 embedding_matrix = embeddings.squeeze(0).numpy()
-embedding_reduced = embedding_matrix[:, :5]  # Reduziere die Dimensionen (z.B. nur die ersten 5 Dimensionen)
+embedding_reduced = embedding_matrix[:, :5]  # Reduziere die Dimensionen
 print("Embedding-Matrix mit reduzierten Dimensionen:")
 print(embedding_reduced)
 
@@ -50,7 +50,7 @@ K = W_K(embeddings)
 V = W_V(embeddings)
 
 # 6. Attention Scores berechnen
-attention_scores = torch.matmul(Q, K.transpose(-2, -1)) / np.sqrt(64)
+attention_scores = torch.matmul(Q, K.transpose(-2, -1)) / np.sqrt(768)
 attention_weights = F.softmax(attention_scores, dim=-1)
 
 # Extrahiere Attention Matrix
@@ -130,7 +130,7 @@ for idx, token in enumerate(tokens):
 
 # Achsenticks und -labels
 ax.set_yticks(y_positions)
-ax.set_yticklabels([])  # Entferne die Y-Achsenbeschriftungen, da die Tokens jetzt manuell hinzugefügt werden
+ax.set_yticklabels([])
 ax.set_xticks([0, 1])
 ax.set_xticklabels(['Links', 'Rechts'])
 plt.title('Alle Token-Verbindungen')

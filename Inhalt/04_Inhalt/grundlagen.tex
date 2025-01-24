@@ -6,7 +6,7 @@ Um zu verstehen, wie Transformer funktionieren, muss zunächst ein kurzer Überb
 
 Neuronale Netze sind ein Teilgebiet des maschinellen Lernens.
 Sie sind trainierbar und können die gesammelten Erfahrungen auf neue Daten anwenden.  
-Neuronale Netze simulieren dabei den Aufbau des menschlichen Gehirns (vgl. \cite[S. 14]{Kinnebrock.2018}).  
+Neuronale Netze orientieren sich an der Struktur des menschlichen Gehirns (vgl. \cite[S. 14]{Kinnebrock.2018}).  
 Sie bestehen aus mehreren Schichten von Neuronen (vgl. \cite[S. 25]{Kinnebrock.2018}).  
 
 Es gibt dabei eine Eingabe- und Ausgabeschicht sowie mehrere versteckte Schichten, in denen die eigentliche Verarbeitung stattfindet.  
@@ -21,11 +21,19 @@ Um den Sinn eines Satzes zu verstehen, muss der Inhalt schrittweise verarbeitet 
 
 \section{Neuronale Netze für Textverarbeitung}
 
-Für Textanalysen, Übersetzungen oder Zusammenfassungen wurden lange Zeit Recurrent Neural Networks (RNNs) verwendet.  
-RNNs analysieren einen Text sequentiell und verknüpfen jedes Wort mit dem Kontext aus dem vorhergehenden Wort (vgl. \cite[S. 2]{attention}).  
+Für Textanalysen, Übersetzungen oder Zusammenfassungen wurden lange Zeit Recurrent Neural Networks (RNNs) verwendet (siehe Abb. \fig{ref:rnn}).  
+RNNs analysieren einen Text sequentiell und verknüpfen jedes Wort mit dem Kontext aus dem vorhergehenden Wort (vgl. \cite[S. 2]{attention}).
+
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.3\textwidth]{Bilder/RNN.png}
+	\caption{RNN als Vorgänger zum Transformer}
+	\label{fig:rnn}
+\end{figure}
 
 Doch RNNs haben Schwächen (vgl. \cite[S. 2]{attention}) (vgl. \cite[S. 208]{paass.2020}).
 Sie haben Schwierigkeiten, den Kontext von größeren Texten vollständig zu erfassen.  
 Außerdem ist die sequentielle Verarbeitung ineffizient und schlecht auf moderne Hardware optimiert, die auf Parallelverarbeitung ausgelegt ist.  
 
-Um diese Probleme zu lösen, wurde eine neue Art von neuronalen Netzen entwickelt: der Transformer.  
+Um diese Probleme zu lösen, wurde eine neue Art neuronaler Netze entwickelt: die Transformer.

@@ -1,7 +1,7 @@
 \chapter{Die Funktionsweise von Scaled Dot-Product Attention}
 
-Transformer arbeiten mit dem zentralen Baustein die Scaled Dot-Product Attention (vgl. \cite[S. 4]{attention}).
-dies ist ein Algorithmus der letztendlich Zusammenhänge zwischen Wörtern z.B. in einem Text aufzeigt.
+Transformer arbeiten mit dem zentralen Baustein die Scaled Dot-Product Attention, auch bekannt als Self-Attention (vgl. \cite[S. 4]{attention}).
+Dies ist ein Algorithmus, der letztendlich Zusammenhänge zwischen Wörtern, z. B. in einem Text, aufzeigt.
 Wörter werden in Form von Tokens verarbeitet, die ganze Wörter oder Wortteile sein können.
 Jeder Token ist einzigartig und wird zunächst nur durch eine natürliche Zahl repräsentiert.
 
@@ -104,7 +104,8 @@ Bei der zweiten Aufgabe der Softmax-Funktion, der \textbf{Normalisierung}, werde
 Damit die Softmax-Funktion aber optimal funktionieren kann, müssen die Werte in den Attention-Score-Vektoren erst einmal \enquote{dimensioniert} werden.
 Bei geläufigen Transformermodellen wird wie oben beschrieben, ein \( d_{\text{model}} \) von mindestens 512 verwendet.
 Durch diese großen Dimensionen entehen bei der Berechnung von den Attention-Scores durch die Aufsummierung bei der Bildung des Skalarprodukte sehr große Werte.
-Diese großen Werte sorgen dafür, dass die Softmax-Funktion viele Q-K-Beziehungen sehr hoch bewertet und so der Transformer nicht sich auf die tatsächlich vielversprechenden Verbindungen konzentrieren kann und so die Weiterverarbeitung ungenau wird.
+Diese großen Werte sorgen dafür, dass die Softmax-Funktion viele Q-K-Beziehungen sehr hoch bewertet und so der Transformer sich nicht auf die tatsächlich vielversprechenden Verbindungen konzentrieren kann.
+Die Weiterverarbeitung wird so ungenau.
 
 Um hohe Attention-Score-Werte zu normalisieren, werden die Attention-Score-Vektor-Werte durch \( \sqrt{d_{\text{model}}} \) geteilt und so für die Softmax-Funktion in einen stabilen Bereich gebracht (vgl. \cite[S. 4]{attention}).
 So kann ein Transformer auch kleine Relevanzunterschiede in der Token-Beziehung berücksichtigen.

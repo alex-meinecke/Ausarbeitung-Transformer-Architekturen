@@ -6,8 +6,15 @@ Um die Architektur eines Transformers besser zu verstehen, müssen zunächst die
 \section{Multi-Head-Attention}
 
 Wie schon im vorherigen Kapitel beschrieben, ist \enquote{Scaled Dot-Product Attention} ein zentraler Baustein in der Transformer-Architektur.  
-Um Transformer noch effizienter zu gestalten, wird Scaled Dot-Product Attention in Form der \textbf{Multi-Head-Attention} angewendet. 
+Um Transformer noch effizienter zu gestalten, wird Scaled Dot-Product Attention in Form der \textbf{Multi-Head-Attention} angewendet (siehe Abb. \ref{fig:multihead}). 
 Dabei beschreibt jeder einzelne Kopf einen eigenen Attention-Zyklus, wie oben beschrieben (vgl. \cite[S. 211]{paass.2020}).
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=1.0\textwidth]{Bilder/multihead.png} 
+	\caption{Scaled-Dot-Product-Attention und Multi-Head-Attention}
+	\label{fig:multihead}
+\end{figure}
 
 Jeder Kopf verwendet unterschiedliche Gewichtungsmatrizen, um den Fokus bei der Analyse der Zusammenhänge zwischen Tokens auf verschiedene Schwerpunkte zu setzen (vgl. \cite[S. 5]{attention}).  
 So kann beispielsweise ein Kopf die Tokens hinsichtlich syntaktischer Beziehungen analysieren, während ein anderer die semantischen Beziehungen betrachtet.  
@@ -43,7 +50,7 @@ Die abwechselnde Verwendung dieser Funktionen sorgt dafür, dass sie sich nie ü
 
 Die Addition-und-Normalisierung-Komponente bewahrt originale Eingabeinformationen, die durch die schrittweise Verarbeitung im Transformer verloren gehen könnten. 
 Nach jeder Verarbeitung, beispielsweise durch die Multi-Head-Attention, werden die Ausgabewerte mit den ursprünglichen Eingabewerten \( x_i \) addiert . 
-Dadurch stehen auch für nachfolgende Komponenten die Originalinformationen weiterhin zur Verfügung (vgl. \cite[K. 3]{layernorm}).
+DaDadurch bleiben die Originalinformationen auch für nachfolgende Komponenten verfügbar (vgl. \cite[K. 3]{layernorm}).
 
 \[
 z_i = x_i + \text{SubkomponentenOutput}_i
@@ -79,17 +86,21 @@ Somit werden nur die positiven Werte in der weiteren Verarbeitung berücksichtig
 
 In der zweiten Schicht werden die Werte aus der ReLU-Funktion mit der zweiten Gewichtungsmatrix \( W_2 \) multipliziert und somit wieder auf die ursprüngliche Eingabegröße skaliert. 
 Auch hier wird der resultierende Vektor durch einen Bias-Wert \( b_2 \) ergänzt (vgl. \cite[S. 5]{attention}).
-Insgesamt kann die Feed-Forward-Schicht mathematisch so ausgedrückt werden: 
-\[
-\text{Feed-Forward}(x) = \text{ReLU}(W_1 x + b_1) W_2 + b_2
-\]
+Insgesamt kann die Feed-Forward-Schicht wie in Abb. \ref{fig:relu} dargestellt werden.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.6\textwidth]{Bilder/RELU.png} 
+	\caption{Feed-Forward-Schicht im Transformer}
+	\label{fig:relu}
+\end{figure}
 
 \section{Encoder}
 
 Der \textbf{Encoder} übersetzt die Eingabewörter in eine abstrahierte Repräsentation (vgl. \cite[S. 3]{attention}).  
 Ziel ist es hierbei, die semantischen und syntaktischen Informationen des Textes zu extrahieren und zu kodieren.  
 
-Am Beginn jeder Textverarbeitung wird, wie auch im vorherigem Kapitel beschrieben, der Eingabetext tokenisiert und in Embeddings umgewandelten.
+Am Beginn jeder Textverarbeitung wird, wie auch im vorherigen Kapitel beschrieben, der Eingabetext tokenisiert und in Embeddings umgewandelt.
 Anschließend werden einmalig Positional-Encodings hinzugefügt, die Positionsdaten der Tokens im Eingabetext ergänzen.
 
 Nun werden diese Embedding-Informationen an die erste Encoder-Schicht weitergeleitet.
@@ -136,11 +147,9 @@ Das Token mit der höchsten Wahrscheinlichkeit wird ausgewählt und zur finalen 
 Dieses neue Token wird dann als Eingabe in den nächsten Decoder-Zyklus eingespeist. 
 Der Vorgang wird fortgesetzt, bis der Decoder ein \enquote{End of Sequence}-Token (\textit{EOS}) generiert, das das Ende der Ausgabe markiert.
 
-
-
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.6\textwidth]{Bilder/ModalNet-21.png} 
-	\caption{Tranformer-Architektur aus \cite[S. 3]{attention}}
+	\caption{Transformer-Architektur aus \cite[S. 3]{attention}}
 	\label{fig:scaled-dot}
 \end{figure}
